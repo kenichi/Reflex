@@ -19,9 +19,16 @@ class PrestineRepo():
     itself.
     """
 
-    def __init__(self, clone_uri):
+    def __init__(self, clone_uri, prod_branch=None, dev_branch=None):
+        if not prod_branch:
+            prod_branch = 'master'
+        if not dev_branch:
+            dev_branch = 'develop'
+
         self.dir = mkdtemp()
         self.clone_uri = clone_uri
+        self.production_branch = prod_branch
+        self.development_branch = dev_branch
 
     def __enter__(self):
         self.git('clone', self.clone_uri, self.dir)

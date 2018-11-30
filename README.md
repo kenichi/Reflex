@@ -55,3 +55,12 @@ the `REPO` environment variable.
 export REPO='git@github.com:brightmd/reflex.git'
 reflex 1.0.5 --release  # Automatically acts on the reflex repo
 ```
+
+If working on a repo which does not use the default branch names for its
+'production' (defaults to master) and 'development' (defaults to develop)
+environments you must specify the different branches as the
+`--production-branch` and `--development-branch` options on the command line
+like so.
+```sh
+reflex --production-branch stable --development-branch development 1.2.0 --hotfix
+```

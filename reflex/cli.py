@@ -17,7 +17,11 @@ from reflex.error import (InvalidUpgradePath, DuplicateGitReference)
               is_flag=True)
 @click.option('--repo', 'git_uri', required=True,
               envvar="REPO", help='Path to a git repo to perform actions on.')
-def main(version, git_uri, **kwargs):
+@click.option('--production-branch', 'prod_branch', default='master',
+              help='The production branch where release tags should live.')
+@click.option('--development-branch', 'develop_branch', default='develop',
+              help='The development branch where new work should live.')
+def main(version, git_uri, prod_branch, develop_branch, **kwargs):
     """ Tool for the automating the release process in a repository.
     """
     action = None
@@ -33,7 +37,7 @@ def main(version, git_uri, **kwargs):
     }.get(action)
 
     if action:
-        with PrestineRepo(git_uri) as repo:
+        with PrestineRepo(git_uri, prod_branch, develop_branch) as repo:
             action(repo, version)
     else:
         print("Invalid subcommand.")
@@ -75,43 +79,46 @@ def complete_release(repo, version=None, **kwargs):
 
     print("Closing {}.".format(testing_branch))
 
-    latest_release = repo.get_last_tag('master', 'release-*')
+    latest_release = repo.get_last_tag(repo.production_branch, 'release-*')
     validate_upgrade(latest_release, release_tag)
 
     # First we merge the release branch into branches locally.
-    repo.checkout('master', 'origin/master')
+    repo.checkout(repo.production_branch, 'origin/{}'.format(
+        repo.production_branch))
     repo.git('merge', '--no-ff', 'origin/{}'.format(testing_branch))
     repo.tag(release_tag, 'Release tag for {}'.format(version))
 
-    # Merge master to develop to absorb any release bugfixes.
-    repo.checkout('develop', 'origin/develop')
-    repo.git('merge', '--no-ff', 'master')
+    # Merge production to development to absorb any release bugfixes.
+    repo.checkout(repo.development_branch, 'origin/{}'.format(
+        repo.development_branch))
+    repo.git('merge', '--no-ff', repo.production_branch)
 
     # Push all local changes in the end if all else works properly.
-    repo.git('push', 'origin', 'master')
+    repo.git('push', 'origin', repo.production_branch)
     repo.git('push', 'origin', release_tag)
-    repo.git('push', 'origin', 'develop')
+    repo.git('push', 'origin', repo.development_branch)
 
     # Finally delete the release branch
     repo.git('push', 'origin', ':{}'.format(testing_branch))
 
-    print("Successfully closed release branch '{}' as '{}' on master.".format(
-        testing_branch, release_tag))
+    print("Successfully closed release branch '{}' as '{}' on {}.".format(
+        testing_branch, release_tag, repo.production_branch))
 
 
 def hotfix(repo, version=None):
     """ Create a hotfix release branch.
     """
-    sha = repo.get_last_tag('origin/master', 'release-*')
+    sha = repo.get_last_tag('origin/{}'.format(repo.production_branch),
+                            'release-*')
     print("Creating new hotfix branch off of {}.".format(sha))
-    repo.checkout('master', sha)
+    repo.checkout(repo.production_branch, sha)
     create_release(repo, sha, version)
 
 
 def release(repo, version=None):
     """ Create a normal release branch.
     """
-    sha = 'develop'
+    sha = repo.development_branch
     print("Creating new release branch off of {}.".format(sha))
     repo.checkout(sha, 'origin/{}'.format(sha))
     create_release(repo, sha, version)
