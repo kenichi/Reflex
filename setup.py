@@ -7,7 +7,7 @@ setup(
     author="Bright.md",
     author_email="support@bright.md",
     description=("Release automation for Bright.md."),
-    license='Proprietary',
+    license='MIT',
     install_requires=[
         'click',
     ],
