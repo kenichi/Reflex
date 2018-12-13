@@ -20,7 +20,8 @@ from reflex.error import (InvalidUpgradePath, DuplicateGitReference)
 @click.option('--production-branch', 'prod_branch', default='master',
               help='The production branch where release tags should live.')
 @click.option('--development-branch', 'develop_branch', default='develop',
-              help='The development branch where new work should live.')
+              help='The development branch where new work should live.',
+              multiple=True)
 def main(version, git_uri, prod_branch, develop_branch, **kwargs):
     """ Tool for the automating the release process in a repository.
     """
@@ -89,14 +90,15 @@ def complete_release(repo, version=None, **kwargs):
     repo.tag(release_tag, 'Release tag for {}'.format(version))
 
     # Merge production to development to absorb any release bugfixes.
-    repo.checkout(repo.development_branch, 'origin/{}'.format(
-        repo.development_branch))
-    repo.git('merge', '--no-ff', repo.production_branch)
+    for branch in repo.development_branches:
+        repo.checkout(branch, 'origin/{}'.format(branch))
+        repo.git('merge', '--no-ff', repo.production_branch)
 
     # Push all local changes in the end if all else works properly.
     repo.git('push', 'origin', repo.production_branch)
     repo.git('push', 'origin', release_tag)
-    repo.git('push', 'origin', repo.development_branch)
+    for branch in repo.development_branches:
+        repo.git('push', 'origin', branch)
 
     # Finally delete the release branch
     repo.git('push', 'origin', ':{}'.format(testing_branch))
@@ -118,7 +120,7 @@ def hotfix(repo, version=None):
 def release(repo, version=None):
     """ Create a normal release branch.
     """
-    sha = repo.development_branch
+    sha, = repo.development_branches
     print("Creating new release branch off of {}.".format(sha))
     repo.checkout(sha, 'origin/{}'.format(sha))
     create_release(repo, sha, version)
