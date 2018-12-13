@@ -1,12 +1,20 @@
 atomicwrites==1.2.1
 attrs==18.2.0
 Click==7.0
+filelock==3.0.10
 funcsigs==1.0.2
+mock==2.0.0
 more-itertools==4.3.0
--e git+git@github.com:brightmd/reflex@dd5cf8058e034fc6b7384d7209eef47e56f16dc1#egg=packaging
+-e .
 pathlib2==2.3.3
+pbr==5.1.1
 pluggy==0.8.0
 py==1.7.0
+pyflakes==2.0.0
 pytest==4.0.1
+reflex==0.1.0
 scandir==1.9.0
 six==1.11.0
+toml==0.10.0
+tox==3.5.3
+virtualenv==16.1.0
