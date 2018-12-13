@@ -52,11 +52,12 @@ def validate_upgrade(_from, to):
     ver_parts = zip(ver_from_parts, ver_to_parts)
 
     for ver_part in ver_parts:
-        if int(ver_part[-1]) > int(ver_part[0]):
+        if int(ver_part[0]) < int(ver_part[-1]):
             return True
-    else:
-        raise InvalidUpgradePath("Unable to upgrade from '{}' to '{}'.".format(
-            _from, to))
+        elif int(ver_part[0]) > int(ver_part[-1]):
+            break
+    raise InvalidUpgradePath(
+        "Unable to upgrade from '{}' to '{}'.".format(_from, to))
 
 
 def complete_release(repo, version=None, **kwargs):
