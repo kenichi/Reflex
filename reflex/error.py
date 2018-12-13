@@ -19,7 +19,7 @@ class InvalidUpgradePath(Exception):
 
 class DuplicateGitReference(Exception):
     """
-    Exception which is thrown when unable to create a tag/branch/ect. as it
+    Exception which is thrown when unable to create a tag/branch/etc. as it
     already exists in the repo.
     """
     pass

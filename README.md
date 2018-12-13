@@ -19,8 +19,8 @@ Usage
 
 Reflex adds the `reflex` command to your command line which can be used to help
 make the release process easier, such as automatically creating and closing
-release/hotfix branches automatically. There are also some helpers involved
-which make sure that releases happen in order and are not duplicated, ect.
+release/hotfix branches. There are also some helpers involved which make sure
+that releases happen in order and are not duplicated, ect.
 
 To create a brand new release branch simply run
 ```sh
