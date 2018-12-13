@@ -86,6 +86,13 @@ class PrestineRepo():
             args.append(sha)
         return self.git('tag', '--annotate', '--message', message, tag, *args)
 
+    def get_last_release(self, sha):
+        """
+        Returns the latest release tag on a given tree by calling get_last_tag
+        with the match argument specified in order to filter non-release tags.
+        """
+        return self.get_last_tag(sha, 'release-*')
+
     def get_last_tag(self, sha=None, match=None):
         """
         Returns the latest tag on a given tree. Can also filter by tags

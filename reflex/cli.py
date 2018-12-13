@@ -81,7 +81,7 @@ def complete_release(repo, version=None, **kwargs):
 
     print("Closing {}.".format(testing_branch))
 
-    latest_release = repo.get_last_tag(repo.production_branch, 'release-*')
+    latest_release = repo.get_last_release(repo.production_branch)
     validate_upgrade(latest_release, release_tag)
 
     # First we merge the release branch into branches locally.
@@ -111,8 +111,7 @@ def complete_release(repo, version=None, **kwargs):
 def hotfix(repo, version=None):
     """ Create a hotfix release branch.
     """
-    sha = repo.get_last_tag('origin/{}'.format(repo.production_branch),
-                            'release-*')
+    sha = repo.get_last_release('origin/{}'.format(repo.production_branch))
     print("Creating new hotfix branch off of {}.".format(sha))
     repo.checkout(repo.production_branch, sha)
     create_release(repo, sha, version)
@@ -130,11 +129,8 @@ def release(repo, version=None):
 def create_release(repo, sha, version):
     """ Create a release branch for running tests.
     """
-    last_version = repo.get_last_tag('{}'.format(sha), 'release-*')
+    last_version = repo.get_last_release(sha)
     validate_upgrade(last_version, version)
-
-    if version.startswith('release-'):
-        version = version.split('-')[-1]
 
     test_branches = [x for x in repo.branches('origin/test-*') if re.match(
         r'origin/test-\d+(\.\d+){2}', x)]
