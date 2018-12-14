@@ -46,7 +46,6 @@ class PrestineRepo():
         result.wait()
         if result.returncode != 0:
             err = result.stderr.readlines()
-            print('\n'.join(err))
             raise GitCommandError(
                 "Failed to run '{}'.".format(' '.join(command)),
                 err
