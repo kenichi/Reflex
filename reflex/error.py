@@ -23,3 +23,11 @@ class DuplicateGitReference(Exception):
     already exists in the repo.
     """
     pass
+
+
+class InvalidGitReference(Exception):
+    """
+    Exception which is thrown when unable to find a given git reference in the
+    repo.
+    """
+    pass

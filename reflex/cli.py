@@ -2,11 +2,14 @@
 # -*- coding: utf-8 -*-
 
 import re
+import sys
 
 import click
 
 from reflex.repo import PrestineRepo
-from reflex.error import (InvalidUpgradePath, DuplicateGitReference)
+from reflex.error import (
+    DuplicateGitReference, InvalidGitReference, InvalidUpgradePath,
+)
 
 
 @click.command()
@@ -19,29 +22,28 @@ from reflex.error import (InvalidUpgradePath, DuplicateGitReference)
               envvar="REPO", help='Path to a git repo to perform actions on.')
 @click.option('--production-branch', 'prod_branch', default='master',
               help='The production branch where release tags should live.')
-@click.option('--development-branch', 'develop_branch', default='develop',
+@click.option('--development-branch', 'develop_branch', default=['develop'],
               help='The development branch where new work should live.',
               multiple=True)
 def main(version, git_uri, prod_branch, develop_branch, **kwargs):
     """ Tool for the automating the release process in a repository.
     """
-    action = None
+    action = []
     for flag, enabled in kwargs.iteritems():
         if enabled:
-            action = flag
-            break
+            action.append(flag)
+    if len(action) != 1:
+        sys.stderr.write("Invalid subcommand.\nSpecify a single action.\n")
+        sys.exit(1)
 
     action = {
         'release': release,
         'hotfix': hotfix,
         'close': complete_release,
-    }.get(action)
+    }.get(action[0])
 
-    if action:
-        with PrestineRepo(git_uri, prod_branch, develop_branch) as repo:
-            action(repo, version)
-    else:
-        print("Invalid subcommand.")
+    with PrestineRepo(git_uri, prod_branch, develop_branch) as repo:
+        action(repo, version)
 
 
 def validate_upgrade(_from, to):
@@ -74,15 +76,21 @@ def complete_release(repo, version=None, **kwargs):
       - After the release branch has been merged successfully into 'production'
         and 'development' we can delete the release branch from upstream.
     """
-    if version.startswith('release-'):
-        version = version.split('-')[-1]
     testing_branch = 'test-{}'.format(version)
     release_tag = 'release-{}'.format(version)
 
-    print("Closing {}.".format(testing_branch))
+    sys.stdout.write("Closing {}.\n".format(testing_branch))
 
+    repo.checkout(repo.production_branch)
     latest_release = repo.get_last_release(repo.production_branch)
     validate_upgrade(latest_release, release_tag)
+
+    test_branches = [x for x in repo.branches('origin/test-*') if re.match(
+        r'origin/test-\d+(\.\d+){2}', x)]
+
+    if "origin/{}".format(testing_branch) not in test_branches:
+        raise InvalidGitReference("Unable to find {} to close release".format(
+            testing_branch))
 
     # First we merge the release branch into branches locally.
     repo.checkout(repo.production_branch, 'origin/{}'.format(
@@ -104,15 +112,16 @@ def complete_release(repo, version=None, **kwargs):
     # Finally delete the release branch
     repo.git('push', 'origin', ':{}'.format(testing_branch))
 
-    print("Successfully closed release branch '{}' as '{}' on {}.".format(
-        testing_branch, release_tag, repo.production_branch))
+    sys.stdout.write("Successfully closed release branch '{}' as '{}' on "
+                     "{}.\n".format(
+                         testing_branch, release_tag, repo.production_branch))
 
 
 def hotfix(repo, version=None):
     """ Create a hotfix release branch.
     """
     sha = repo.get_last_release('origin/{}'.format(repo.production_branch))
-    print("Creating new hotfix branch off of {}.".format(sha))
+    sys.stdout.write("Creating new hotfix branch off of {}.\n".format(sha))
     repo.checkout(repo.production_branch, sha)
     create_release(repo, sha, version)
 
@@ -121,7 +130,7 @@ def release(repo, version=None):
     """ Create a normal release branch.
     """
     sha, = repo.development_branches
-    print("Creating new release branch off of {}.".format(sha))
+    sys.stdout.write("Creating new release branch off of {}.\n".format(sha))
     repo.checkout(sha, 'origin/{}'.format(sha))
     create_release(repo, sha, version)
 
@@ -136,19 +145,19 @@ def create_release(repo, sha, version):
         r'origin/test-\d+(\.\d+){2}', x)]
 
     if test_branches:
-        print("!! Warning, the following sprint testing branches are open:")
+        sys.stderr.write("!! Warning, the following sprint testing branches "
+                         "are open:\n")
         for branch in test_branches:
-            print("!!\t* {}".format(branch))
+            sys.stderr.write("!!\t* {}\n".format(branch))
 
     testing_branch = 'test-{}'.format(version)
     if repo.branch_exists('origin/{}'.format(testing_branch)):
         raise DuplicateGitReference(
-            "Oops! Looks like {} already exists!".format(testing_branch))
+            "Oops! Looks like {} already exists!\n".format(testing_branch))
 
     repo.checkout(testing_branch, sha)
 
     repo.git('push', 'origin', testing_branch)
 
-    print("Successfully opened release branch '{}' for testing.".format(
-        testing_branch
-    ))
+    sys.stdout.write("Successfully opened release branch '{}' for "
+                     "testing.\n".format(testing_branch))
