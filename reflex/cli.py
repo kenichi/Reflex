@@ -29,7 +29,7 @@ def main(version, git_uri, prod_branch, develop_branch, **kwargs):
     """ Tool for the automating the release process in a repository.
     """
     action = []
-    for flag, enabled in kwargs.iteritems():
+    for flag, enabled in kwargs.items():
         if enabled:
             action.append(flag)
     if len(action) != 1:

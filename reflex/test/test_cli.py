@@ -26,6 +26,8 @@ def releaseable_repo(tmpdir):
     result.wait()
     with PrestineRepo(tempdir) as repo:
         # Setup a test repo which has commits that are ready to be released.
+        repo.git('config', 'user.email', 'ci@test.com')
+        repo.git('config', 'user.name', 'ci')
         repo.git('commit', '--allow-empty', '-m', 'initial commit')
         repo.git('tag', '-a', 'release-1.0.0', '-m', 'release-1.0.0')
         repo.git('checkout', '-b', 'develop')
