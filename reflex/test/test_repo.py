@@ -74,9 +74,9 @@ def test_branches(_):
     Ensure git branches are listed when calling PrestineRepo#branches.
     """
     branches_readlines = [
-        '  brightmd/master\n',
-        '  brightmd/stable\n',
-        '  brightmd/develop\n',
+        b'  brightmd/master\n',
+        b'  brightmd/stable\n',
+        b'  brightmd/develop\n',
     ]
 
     repo = PrestineRepo('/tmp/stop')

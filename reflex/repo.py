@@ -60,7 +60,7 @@ class PrestineRepo():
             args.append(match)
         result = self.git('branch', *args)
         branches = [branch.strip() for branch in result.stdout.readlines()]
-        return branches
+        return [branch.decode() for branch in branches]
 
     def branch_exists(self, full_branch_name):
         """ Returns True or False depending on if a branch exists or not.
@@ -102,4 +102,5 @@ class PrestineRepo():
             options += ['--match', match]
         if sha:
             options.append(sha)
-        return self.git('describe', *options).stdout.read().strip()
+        tag = self.git('describe', *options).stdout.read()
+        return tag.decode().strip()
