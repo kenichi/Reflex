@@ -25,6 +25,9 @@ def releaseable_repo(tmpdir):
     result = Popen(['git', 'init', '--bare', '.'], cwd=tempdir)
     result.wait()
     with PrestineRepo(tempdir) as repo:
+        # SVC-873 use a default other than 'master' by implicitly creating 'main'
+        repo.git('checkout', '-b', 'main')
+
         # Setup a test repo which has commits that are ready to be released.
         repo.git('config', 'user.email', 'ci@test.com')
         repo.git('config', 'user.name', 'ci')
@@ -33,12 +36,12 @@ def releaseable_repo(tmpdir):
         repo.git('checkout', '-b', 'develop')
         for i in range(3):
             repo.git('commit', '--allow-empty', '-m', 'commit {}'.format(i))
-        repo.git('push', 'origin', 'master:master')
+        repo.git('push', 'origin', 'main:main')
         repo.git('push', 'origin', 'develop:develop')
 
-        # Ensure we are always on the master branch in this repo before handing
+        # Ensure we are always on the main branch in this repo before handing
         # off to the underlying test.
-        repo.git('checkout', 'master')
+        repo.git('checkout', 'main')
         yield repo
 
 
@@ -189,7 +192,7 @@ def test_merges_into_multiple_dev_branches(releaseable_repo):
     releaseable_repo.git('checkout', '-b', 'develop-2')
     releaseable_repo.git('commit', '--allow-empty', '-m', 'Testing commit')
     releaseable_repo.git('push', 'origin', 'develop-2')
-    releaseable_repo.git('checkout', 'master')
+    releaseable_repo.git('checkout', 'main')
     cli.create_release(releaseable_repo, 'develop', '1.1.0')
 
     releaseable_repo.development_branches = ['develop', 'develop-2']
@@ -218,9 +221,9 @@ def test_tag_is_created_for_release(releaseable_repo, capsys):
     Ensure that a final release tag is created when closing a release.
     """
     cli.create_release(releaseable_repo, 'develop', '1.1.0')
-    assert releaseable_repo.get_last_release('master') == 'release-1.0.0'
+    assert releaseable_repo.get_last_release('main') == 'release-1.0.0'
     cli.complete_release(releaseable_repo, '1.1.0')
-    assert releaseable_repo.get_last_release('master') == 'release-1.1.0'
+    assert releaseable_repo.get_last_release('main') == 'release-1.1.0'
 
     out, err = capsys.readouterr()
     assert "Successfully closed" in out

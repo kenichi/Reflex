@@ -21,7 +21,7 @@ class PrestineRepo():
 
     def __init__(self, clone_uri, prod_branch=None, dev_branches=None):
         if not prod_branch:
-            prod_branch = 'master'
+            prod_branch = 'main'
         if not dev_branches:
             dev_branches = ['develop']
 

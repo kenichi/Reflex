@@ -3,13 +3,14 @@ from inspect import cleandoc
 
 from setuptools import setup
 
-_version = {}
-exec(open('reflex/_version.py').read(), _version)
+
+__version__ = '0.2.0'
+
 
 setup(
-    name='reflex',
+    name='brightmd.reflex',
     packages=['reflex', 'reflex.test'],
-    version=_version['__version__'],
+    version=__version__,
     description='Repository release automation',
     author='Bright.md',
     author_email='support@bright.md',
@@ -21,8 +22,13 @@ setup(
     click>=5.0,<8.0
     ''').split(),
     extras_require={
-        'testing': [
+        'dev': [
+            'awscli',
+            'mock',
             'pytest',
+            'pytest-coverage',
+            's3pypi',
+            'tox',
         ]
     },
     entry_points={

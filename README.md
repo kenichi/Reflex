@@ -10,8 +10,10 @@ humans don't have to.
 Installation
 ============
 
+If not installing from source, use
+
 ```sh
-python setup.py develop
+pip install brightmd.reflex
 ```
 
 Usage
@@ -36,9 +38,9 @@ again.
 ```sh
 reflex 1.0.1 --close --repo git@github.com:brightmd/reflex.git
 ```
-This command automatically merges the `test-1.0.1` branch into `master` and
+This command automatically merges the `test-1.0.1` branch into `main` and
 then into `develop` to make sure that all changes are picked up everywhere.
-It also creates a `release-1.0.1` tag on the `master` branch's merge commit.
+It also creates a `release-1.0.1` tag on the `main` branch's merge commit.
 If all is successful it also deletes the `test-1.0.1` branch since it is no
 longer needed.
 
@@ -57,7 +59,7 @@ reflex 1.0.5 --release  # Automatically acts on the reflex repo
 ```
 
 If working on a repo which does not use the default branch names for its
-'production' (defaults to master) and 'development' (defaults to develop)
+'production' (defaults to main) and 'development' (defaults to develop)
 environments you must specify the different branches as the
 `--production-branch` and `--development-branch` options on the command line
 like so.

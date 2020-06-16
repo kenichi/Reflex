@@ -20,7 +20,7 @@ from reflex.error import (
               is_flag=True)
 @click.option('--repo', 'git_uri', required=True,
               envvar="REPO", help='Path to a git repo to perform actions on.')
-@click.option('--production-branch', 'prod_branch', default='master',
+@click.option('--production-branch', 'prod_branch', default='main',
               help='The production branch where release tags should live.')
 @click.option('--development-branch', 'develop_branch', default=['develop'],
               help='The development branch where new work should live.',
