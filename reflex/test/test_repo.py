@@ -33,7 +33,7 @@ def test_prestinerepo_creation():
             ])
             assert repo.dir == temp_dir
             assert repo.clone_uri == clone_uri
-            assert repo.production_branch == 'master'
+            assert repo.production_branch == 'main'
             assert repo.development_branches == ['develop']
         pRmtree.assert_called_with(temp_dir)
 
@@ -74,7 +74,7 @@ def test_branches(_):
     Ensure git branches are listed when calling PrestineRepo#branches.
     """
     branches_readlines = [
-        b'  brightmd/master\n',
+        b'  brightmd/main\n',
         b'  brightmd/stable\n',
         b'  brightmd/develop\n',
     ]
@@ -85,7 +85,7 @@ def test_branches(_):
     mResult.stdout.readlines.return_value = branches_readlines
     mockPopen = patch('reflex.repo.Popen', return_value=mResult)
     with mockPopen as patchPopen:
-        assert repo.branches() == ['brightmd/master', 'brightmd/stable',
+        assert repo.branches() == ['brightmd/main', 'brightmd/stable',
                                    'brightmd/develop']
         repo.branches('shrubbery')
         patchPopen.assert_has_calls([
