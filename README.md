@@ -10,8 +10,10 @@ humans don't have to.
 Installation
 ============
 
+If not installing from source, use
+
 ```sh
-python setup.py develop
+pip install brightmd.reflex
 ```
 
 Usage
