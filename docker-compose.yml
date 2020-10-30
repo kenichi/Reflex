@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  reflex:
+    build:
+      args:
+        UID: ${UID}
+        USER: ${USER}
+        BUILDKIT_INLINE_CACHE: 1
+      context: .
+    command: sleep 86400
+    image: reflex
+    init: true
+    volumes:
+      - ~/.ssh:/home/${USER}/.ssh:ro
+      - ~/.gitconfig:/home/${USER}/.gitconfig:ro

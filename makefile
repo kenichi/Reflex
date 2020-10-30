@@ -30,3 +30,9 @@ $(BINARY_PACKAGE_PYTHON3):
 s3pypi: $(SOURCE_PACKAGE) $(BINARY_PACKAGE_PYTHON2) $(BINARY_PACKAGE_PYTHON3)
 	. $(VIRTUALENV_PYTHON2)/bin/activate && s3pypi --secret $(S3PYPI_SECRET)/python2 --bucket $(S3PYPI_BUCKET)
 	. $(VIRTUALENV_PYTHON3)/bin/activate && s3pypi --secret $(S3PYPI_SECRET)/python3 --bucket $(S3PYPI_BUCKET)
+
+docker:
+	@export UID USER && \
+		COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker-compose build reflex
+	@docker-compose up -d
+	@docker-compose exec reflex bash -l
